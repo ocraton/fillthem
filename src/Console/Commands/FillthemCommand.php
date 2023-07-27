@@ -20,14 +20,28 @@ final class FillthemCommand extends Command
         $name = Str::studly($this->argument('name'));
         $fillable = $this->option('fillable');
 
-        // 1. Crea il modello
+        // Crea il modello
         $this->call('make:model', [
             'name' => $name,
         ]);
 
-        // 2. Aggiorna il modello con gli $fillable
+        // Aggiorna il modello con gli $fillable
         $fillableArray = array_map('trim', explode(',', $fillable));
         $this->updateModelFillable($name, $fillableArray);
+
+        // 3. Crea la migration
+        $tableName = Str::plural(Str::snake($name));
+        $this->call('make:migration', [
+            'name' => "create_{$tableName}_table",
+            '--create' => $tableName,
+        ]);
+
+        // 4. Aggiorna la migration con i campi fillable
+        $migrationFile = database_path('migrations') . '/' . $this->getLastMigrationFile();
+        $migrationContents = file_get_contents($migrationFile);
+        $fillableMigrationCode = implode('', array_map(fn ($field) => "\$table->string('$field');\n" . str_repeat(' ', 12), $fillableArray));
+        $migrationContents = str_replace('$table->id();', "\$table->id();\n" . str_repeat(' ', 12) . $fillableMigrationCode, $migrationContents);
+        file_put_contents($migrationFile, $migrationContents);
 
 
         $this->info("Model created successfully with fillables!");
@@ -49,6 +63,13 @@ final class FillthemCommand extends Command
         );
 
         file_put_contents($modelPath, $modelContent);
+    }
+
+
+    private function getLastMigrationFile(): string
+    {
+        $files = scandir(database_path('migrations'), SCANDIR_SORT_DESCENDING);
+        return $files[0];
     }
 
 }

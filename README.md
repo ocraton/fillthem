@@ -3,7 +3,7 @@
 [![Laravel][ico-laravel]][link-laravel]
 [![Software License][ico-license]](LICENSE)
 
-ocraton/fillthem is a package for Laravel that provide an aratisan commad to define a model name with fillable fields. Based on that model name it will create a migration and seeder with those fields.
+ocraton/fillthem is a Laravel package that provide an artisan command to define a model name with fillable fields. Based on that model name, it will create a migration and seeder with those fields.
 
 
 - [Installation](#installation)

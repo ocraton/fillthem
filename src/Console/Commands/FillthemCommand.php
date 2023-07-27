@@ -6,6 +6,7 @@ namespace Ocraton\Fillthem\Console\Commands;
 
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
+use Carbon\Carbon;
 
  
 final class FillthemCommand extends Command
@@ -111,6 +112,7 @@ final class FillthemCommand extends Command
             switch ($type) {
                 case 'int':
                 case 'integer':
+                case 'usignedBigInteger':
                     $fieldTemplate .= "\t\t\t'$name' => 123,\n"; 
                     break;
                 case 'string':
@@ -118,6 +120,18 @@ final class FillthemCommand extends Command
                     break;
                 case 'text':
                     $fieldTemplate .= "\t\t\t'$name' => 'example_text_$name',\n"; 
+                    break;
+                case 'double':
+                case 'float':
+                    $fieldTemplate .= "\t\t\t'$name' => 123.45,\n"; 
+                    break;
+                case 'date':
+                case 'timestamp':
+                case 'time':
+                    $fieldTemplate .= "\t\t\t'$name' => Carbon::now(),\n"; 
+                    break;
+                case 'boolean':
+                    $fieldTemplate .= "\t\t\t'$name' => false,\n"; 
                     break;
                 default:
                     // TODO: unknow cases as a string

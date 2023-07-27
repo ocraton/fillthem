@@ -15,7 +15,7 @@ ocraton/fillthem is a Laravel package that provide an artisan command to define 
 Run the following command to install the latest applicable version of the package:
 
 ```bash
-composer require --dev ocraton/laravel-fillthem
+composer require --dev ocraton/fillthem
 ```
 
 

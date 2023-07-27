@@ -32,7 +32,7 @@ In your app config, add the Service Provider to the `$providers`:
 
 ## Usage
 
-Run the following command to create a Car model, migration and seeder with types:
+Run the following command to create a Car model, migration and seeder with Laravel migration types column:
 
 ```bash
 php artisan make:fillthem Car --fillable=integer:n_wheels,string:model

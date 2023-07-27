@@ -1,6 +1,4 @@
-![Laravel Fillthem]
-
-# fillthem
+# Fillthem
 
 [![Laravel][ico-laravel]][link-laravel]
 [![Software License][ico-license]](LICENSE.md)

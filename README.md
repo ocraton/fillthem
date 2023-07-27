@@ -7,6 +7,7 @@ ocraton/fillthem is a Laravel package that provide an artisan command to define 
 
 
 - [Installation](#installation)
+- [Usage](#usage)
 
 
 ## Installation
@@ -29,6 +30,13 @@ In your app config, add the Service Provider to the `$providers`:
 ],
 ```
 
+## Usage
+
+Run the following command to create a Car model, migration and seeder with types:
+
+```bash
+php artisan make:fillthem Car --fillable=integer:n_wheels,string:model
+```
 
 That's it!
 

@@ -6,8 +6,6 @@ namespace Ocraton\Fillthem\Console\Commands;
 
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
-use Carbon\Carbon;
-
  
 final class FillthemCommand extends Command
 {
@@ -49,7 +47,7 @@ final class FillthemCommand extends Command
         $migrationFile = database_path('migrations') . '/' . $this->getLastMigrationFile();
         $migrationContents = file_get_contents($migrationFile);
         $fillableMigrationCode = implode("",array_map(fn ($field) => "\$table->".$field['type']."('".$field['name']."');\n" . str_repeat(' ', 12), $migrationArray));
-        $migrationContents = str_replace('$table->id();', "\$table->id();\n" . str_repeat(' ', 12) . $fillableMigrationCode, $migrationContents);
+        $migrationContents = str_replace('$table->id();', "\$table->id();\n" . str_repeat(' ', 12) . rtrim($fillableMigrationCode, "\n"), $migrationContents);
         file_put_contents($migrationFile, $migrationContents);
 
 
@@ -113,29 +111,33 @@ final class FillthemCommand extends Command
                 case 'int':
                 case 'integer':
                 case 'usignedBigInteger':
-                    $fieldTemplate .= "\t\t\t'$name' => 123,\n"; 
+                    $fieldTemplate .= "\t\t\t'$name' => fake()->randomNumber(2, 100),\n"; 
                     break;
                 case 'string':
-                    $fieldTemplate .= "\t\t\t'$name' => 'example_$name',\n"; 
+                    if (strpos($name, 'mail') !== false || strpos($name, 'email') !== false) {
+                        $fieldTemplate .= "\t\t\t'$name' => fake()->safeEmail(),\n";
+                    } else {
+                        $fieldTemplate .= "\t\t\t'$name' => fake()->sentence(1),\n"; 
+                    }
                     break;
                 case 'text':
-                    $fieldTemplate .= "\t\t\t'$name' => 'example_text_$name',\n"; 
+                    $fieldTemplate .= "\t\t\t'$name' => fake()->sentence(rand(10, 20)),\n"; 
                     break;
                 case 'double':
                 case 'float':
-                    $fieldTemplate .= "\t\t\t'$name' => 123.45,\n"; 
+                    $fieldTemplate .= "\t\t\t'$name' => fake()->randomFloat(2, 0, 100),\n"; 
                     break;
                 case 'date':
                 case 'timestamp':
                 case 'time':
-                    $fieldTemplate .= "\t\t\t'$name' => Carbon::now(),\n"; 
+                    $fieldTemplate .= "\t\t\t'$name' => \Carbon\Carbon::now(),\n"; 
                     break;
                 case 'boolean':
-                    $fieldTemplate .= "\t\t\t'$name' => false,\n"; 
+                    $fieldTemplate .= "\t\t\t'$name' => fake()->boolean(50),\n"; 
                     break;
                 default:
                     // TODO: unknow cases as a string
-                    $fieldTemplate .= "\t\t\t'$name' => 'example_text_$name',\n"; 
+                    $fieldTemplate .= "\t\t\t'$name' => fake()->sentence(rand(2, 10)),\n"; 
                     break;
             }
         }

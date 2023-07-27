@@ -2,27 +2,27 @@
     "name": "ocraton/fillthem",
     "description": "One command for create model, migration and seeder with fillable",
     "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "ocraton",
+            "email": "spocram@gmail.com"
+        }
+    ],
     "require": {
         "illuminate/support": "^10.16"
     },
     "require-dev": {},
+    "autoload": {
+        "psr-4": {
+            "Ocraton\\Fillthem\\": "src/"
+        }
+    },
     "minimum-stability": "dev",
     "prefer-stable": true,
     "config": {
         "sort-packages": true,
         "preferred-install": "dist",
         "optimize-autoloader": true
-    },
-    "license": "MIT",
-    "autoload": {
-        "psr-4": {
-            "Ocraton\\Fillthem\\": "src/"
-        }
-    },
-    "authors": [
-        {
-            "name": "ocraton",
-            "email": "spocram@gmail.com"
-        }
-    ]
+    }
 }

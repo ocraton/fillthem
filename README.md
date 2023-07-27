@@ -11,7 +11,6 @@ ocraton/fillthem is a package for Laravel that provide an aratisan commad to def
 - [Installation](#installation)
 
 
-
 ## Installation
 
 Run the following command to install the latest applicable version of the package:

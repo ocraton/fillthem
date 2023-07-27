@@ -1,6 +1,6 @@
 {
     "name": "ocraton/fillthem",
-    "description": "One command for create model, migration, seeder and resource controller with fillable",
+    "description": "One command for create model, migration and seeder with fillable",
     "type": "library",
     "require": {
         "illuminate/support": "^10.16"

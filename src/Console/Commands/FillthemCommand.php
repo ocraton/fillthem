@@ -10,7 +10,7 @@ use Illuminate\Console\Command;
  
 final class FillthemCommand extends Command
 {
-    protected $signature = 'make:fillthem {name : The name of the resource (singular form)} {--fillable= : Comma-separated list of fillable fields}';
+    protected $signature = 'make:fillthem {name : The name of the resource (singular form)} {--fillable= : Comma-separated list of fillable fields with types es. type:name}';
 
     protected $description = 'Create a model, migration, and seeder with fillable fields';
 
@@ -19,6 +19,15 @@ final class FillthemCommand extends Command
 
         $name = Str::studly($this->argument('name'));
         $fillable = $this->option('fillable');
+        $fillableArray = [];
+        $migrationArray = [];
+
+        $fieldsArray = array_map('trim', explode(',', $fillable));
+        foreach ($fieldsArray as $pair) {
+            list($type, $field) = array_map('trim', explode(':', $pair));
+            $migrationArray[] = ['type' => $type, 'name' => $field];
+            $fillableArray[] = $field;
+        }
 
         // Crea il modello
         $this->call('make:model', [
@@ -26,7 +35,6 @@ final class FillthemCommand extends Command
         ]);
 
         // Aggiorna il modello con gli $fillable
-        $fillableArray = array_map('trim', explode(',', $fillable));
         $this->updateModelFillable($name, $fillableArray);
 
         // 3. Crea la migration
@@ -39,7 +47,7 @@ final class FillthemCommand extends Command
         // 4. Aggiorna la migration con i campi fillable
         $migrationFile = database_path('migrations') . '/' . $this->getLastMigrationFile();
         $migrationContents = file_get_contents($migrationFile);
-        $fillableMigrationCode = implode('', array_map(fn ($field) => "\$table->string('$field');\n" . str_repeat(' ', 12), $fillableArray));
+        $fillableMigrationCode = implode("",array_map(fn ($field) => "\$table->".$field['type']."('".$field['name']."');\n" . str_repeat(' ', 12), $migrationArray));
         $migrationContents = str_replace('$table->id();', "\$table->id();\n" . str_repeat(' ', 12) . $fillableMigrationCode, $migrationContents);
         file_put_contents($migrationFile, $migrationContents);
 
@@ -52,7 +60,7 @@ final class FillthemCommand extends Command
         // 6. Aggiorna il seeder con il metodo create
         $seederPath = database_path("seeders/{$name}Seeder.php");
         $seederContents = file_get_contents($seederPath);
-        $seederCreateCode = $this->generateSeederCreateCode($name, $fillableArray);
+        $seederCreateCode = $this->generateSeederCreateCode($name, $migrationArray);
           $seederContents = str_replace([
             '//',
             'use Illuminate\Database\Seeder;'
@@ -68,11 +76,11 @@ final class FillthemCommand extends Command
 
     }
 
-    private function updateModelFillable(string $modelName, array $fillableArray): void
+    private function updateModelFillable(string $modelName, array $migrationArray): void
     {
         $modelPath = app_path("Models/{$modelName}.php");
         $modelContent = file_get_contents($modelPath);
-        $fillableString = implode("',\n\t\t" . "'", $fillableArray);
+        $fillableString = implode("',\n\t\t" . "'", $migrationArray);
         $fillableCode = "protected \$fillable = [\n\t\t'{$fillableString}'\n\t];";
 
         // Inserire l'array $fillable prima della parentesi di chiusura della classe
@@ -92,18 +100,36 @@ final class FillthemCommand extends Command
         return $files[0];
     }
 
-function generateSeederCreateCode(string $modelName, array $fillableArray)
-{
+    function generateSeederCreateCode(string $modelName, array $migrationArray)
+    {
 
-    $fieldTemplate = "$modelName::create([\n";
-    foreach ($fillableArray as $field) {
-        $fieldTemplate .= "\t\t\t'$field' => 'example_$field',\n";
+        $fieldTemplate = "$modelName::create([\n";
+        foreach ($migrationArray as $fieldData) {
+            $name = $fieldData['name'];
+            $type = $fieldData['type'];
+
+            switch ($type) {
+                case 'int':
+                case 'integer':
+                    $fieldTemplate .= "\t\t\t'$name' => 123,\n"; 
+                    break;
+                case 'string':
+                    $fieldTemplate .= "\t\t\t'$name' => 'example_$name',\n"; 
+                    break;
+                case 'text':
+                    $fieldTemplate .= "\t\t\t'$name' => 'example_text_$name',\n"; 
+                    break;
+                default:
+                    // TODO: unknow cases as a string
+                    $fieldTemplate .= "\t\t\t'$name' => 'example_text_$name',\n"; 
+                    break;
+            }
+        }
+
+        $fieldTemplate .= "\t\t]);\n" . str_repeat(' ', 8);
+
+        return $fieldTemplate;
     }
-    
-    $fieldTemplate .= "\t\t]);\n" . str_repeat(' ', 8);
-
-    return $fieldTemplate;
-}
 
 }
 

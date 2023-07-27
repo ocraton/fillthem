@@ -44,7 +44,27 @@ final class FillthemCommand extends Command
         file_put_contents($migrationFile, $migrationContents);
 
 
-        $this->info("Model created successfully with fillables!");
+        // 5. Crea il seeder
+        $this->call('make:seeder', [
+            'name' => "{$name}Seeder",
+        ]);
+
+        // 6. Aggiorna il seeder con il metodo create
+        $seederPath = database_path("seeders/{$name}Seeder.php");
+        $seederContents = file_get_contents($seederPath);
+        $seederCreateCode = $this->generateSeederCreateCode($name, $fillableArray);
+          $seederContents = str_replace([
+            '//',
+            'use Illuminate\Database\Seeder;'
+        ], [
+            $seederCreateCode,
+            "use Illuminate\Database\Seeder;\nuse App\Models\\{$name};"
+        ], $seederContents);
+        $seederContents = str_replace('//', $seederCreateCode, $seederContents);
+        file_put_contents($seederPath, $seederContents);
+
+
+        $this->info("Model, migration and seeder created successfully with fillables!");
 
     }
 
@@ -71,6 +91,19 @@ final class FillthemCommand extends Command
         $files = scandir(database_path('migrations'), SCANDIR_SORT_DESCENDING);
         return $files[0];
     }
+
+function generateSeederCreateCode(string $modelName, array $fillableArray)
+{
+
+    $fieldTemplate = "$modelName::create([\n";
+    foreach ($fillableArray as $field) {
+        $fieldTemplate .= "\t\t\t'$field' => 'example_$field',\n";
+    }
+    
+    $fieldTemplate .= "\t\t]);\n" . str_repeat(' ', 8);
+
+    return $fieldTemplate;
+}
 
 }
 

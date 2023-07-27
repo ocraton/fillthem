@@ -9,11 +9,10 @@
             "email": "spocram@gmail.com"
         }
     ],
-    "require": { },
-    "require-dev": {
-        "illuminate/support": "^10.16",
-        "ocraton/fillthem": "1.0.0"
+    "require": {
+        "illuminate/support": "^10.16"
     },
+    "require-dev": {},
     "autoload": {
         "psr-4": {
             "Ocraton\\Fillthem\\": "src/"
